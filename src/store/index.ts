@@ -7,6 +7,7 @@ import thunkMiddleware from "redux-thunk";
 import { createLogger } from "redux-logger";
 import { ActionMeta } from "redux-actions";
 import { useDispatch } from "react-redux";
+import { composeWithDevTools } from "redux-devtools-extension";
 
 import promiseMiddleware from "./promise-middleware";
 
@@ -16,17 +17,16 @@ import reducers from "./construct";
 export * from "./reducers";
 export * from "./construct";
 
-const middleware = [
-  thunkMiddleware,
-  promiseMiddleware,
-];
+const middleware = [thunkMiddleware, promiseMiddleware];
 
 if (process.env.NODE_ENV === "development") {
   middleware.push(createLogger());
 }
 
-// FIXME: Hack, we don't actually return a promise when one is not passed.
-export function asyncDispatch<T, V>(action: ActionMeta<Promise<T> | T, V>): Promise<ActionMeta<T, V>> {
+// FIXME: Hack, we don"t actually return a promise when one is not passed.
+export function asyncDispatch<T, V>(
+  action: ActionMeta<Promise<T> | T, V>
+): Promise<ActionMeta<T, V>> {
   return store.dispatch(action) as any;
 }
 
@@ -39,7 +39,7 @@ export function useAsyncDispatch() {
 
 export const store = createStore(
   reducers,
-  applyMiddleware(...middleware)
+  composeWithDevTools(applyMiddleware(...middleware))
 );
 
 export const persistor = persistStore(store, { manualPersist: true } as any);
